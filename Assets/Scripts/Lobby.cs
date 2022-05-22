@@ -113,7 +113,7 @@ public class Lobby : MonoBehaviourPunCallbacks
 		{
 			Debug.Log("Joined Room");
 
-			PhotonNetwork.LoadLevel("Room");
+			PhotonNetwork.LoadLevel("Room_2");
 		}
 	}
 
