@@ -1,7 +1,5 @@
-using Photon.Pun;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
 
 public class ChickenController : MonoBehaviourPunCallbacks
 {
@@ -12,11 +10,14 @@ public class ChickenController : MonoBehaviourPunCallbacks
     [SerializeField] private int lives = 0;
     [SerializeField] private float jumpForce = 0f;
     [SerializeField] private Rigidbody rb = null;
+    [SerializeField] private CapsuleCollider capsuleCollider = null;
     [SerializeField] private Animator animator = null;
     [SerializeField] private CameraController cameraController = null;
+    [SerializeField] private LayerMask jumpleableMask = default;
     #endregion
 
     #region PRIVATE_FIELDS
+    private float halfHeight = 0f;
     private bool isRun = false;
     private bool isDead = false;
     #endregion
@@ -24,6 +25,8 @@ public class ChickenController : MonoBehaviourPunCallbacks
     #region UNITY_CALLS
     private void Start()
     {
+        halfHeight = capsuleCollider.bounds.extents.y / 2;
+
         if (photonView.IsMine)
         {
             cameraController.OnStartFollowing();
@@ -32,10 +35,13 @@ public class ChickenController : MonoBehaviourPunCallbacks
 
     private void Update()
     {
-        Move();
-        Run();
-        Rotate();
-        Jump();
+        if (photonView.IsMine)
+        {
+            Move();
+            Run();
+            Rotate();
+            Jump();
+        }
     }
     #endregion
 
@@ -47,15 +53,16 @@ public class ChickenController : MonoBehaviourPunCallbacks
     private void Move()
     {
         float axisY = Input.GetAxis("Vertical");
+        float axisAbs = Mathf.Abs(axisY);
 
-        if (Mathf.Abs(axisY) > Mathf.Epsilon)
+        if (axisAbs > Mathf.Epsilon)
         {
             Vector3 moveVector = transform.forward * axisY;
             moveVector *= isRun ? runSpeed : walkSpeed;
 
             rb.velocity = new Vector3(moveVector.x, rb.velocity.y, moveVector.z);
 
-            animator.SetFloat("Speed", isRun ? axisY: axisY / 2);
+            animator.SetFloat("Speed", isRun ? axisAbs : axisAbs / 2);
         }
     }
 
@@ -73,14 +80,13 @@ public class ChickenController : MonoBehaviourPunCallbacks
 
     private void Rotate()
     {
-        float axisX = Input.GetAxis("Horizontal");
-
-        if (Mathf.Abs(axisX) > Mathf.Epsilon)
+        if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
         {
-            Vector3 euler = Vector3.zero;
-            euler.y = axisX * rotSpeed;
-
-            transform.eulerAngles += euler;
+            transform.eulerAngles += Vector3.down * rotSpeed;
+        }
+        else if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
+        {
+            transform.eulerAngles += Vector3.up * rotSpeed;
         }
     }
 
@@ -88,8 +94,16 @@ public class ChickenController : MonoBehaviourPunCallbacks
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            if (CheckGrounded())
+            {
+                rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            }
         }
+    }
+
+    private bool CheckGrounded()
+    {
+        return Physics.Raycast(transform.position, Vector3.down, halfHeight + 0.05f, jumpleableMask);
     }
     #endregion
 }

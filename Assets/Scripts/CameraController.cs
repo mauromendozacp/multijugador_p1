@@ -15,11 +15,6 @@ public class CameraController : MonoBehaviour
     #endregion
 
     #region UNITY_CALLS
-    private void Start()
-    {
-        OnStartFollowing();
-    }
-
     private void LateUpdate()
     {
         if (Follow)
