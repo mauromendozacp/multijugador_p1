@@ -11,6 +11,7 @@ public class CameraController : MonoBehaviour
     #endregion
 
     #region PROPERTIES
+    public Transform CamTransform { get => camTransform; }
     public bool Follow { get; set; } = false;
     #endregion
 

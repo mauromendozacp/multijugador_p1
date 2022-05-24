@@ -93,9 +93,8 @@ namespace Photon.Pun.Demo.PunBasics
 		/// </summary>
 		public void StopLoaderAnimation()
 		{
-			particles.SetActive(false);
+			particles?.SetActive(false);
 		}
-
 		#endregion
 	}
 }

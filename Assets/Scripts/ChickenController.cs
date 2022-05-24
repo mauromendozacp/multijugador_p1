@@ -13,6 +13,8 @@ public class ChickenController : MonoBehaviourPunCallbacks
     [SerializeField] private CapsuleCollider capsuleCollider = null;
     [SerializeField] private Animator animator = null;
     [SerializeField] private CameraController cameraController = null;
+    [SerializeField] private GameObject nickname = null;
+    [SerializeField] private TMPro.TMP_Text nickTxt = null;
     [SerializeField] private LayerMask jumpleableMask = default;
     #endregion
 
@@ -31,22 +33,29 @@ public class ChickenController : MonoBehaviourPunCallbacks
         {
             cameraController.OnStartFollowing();
         }
+
+        nickTxt.text = photonView.Owner.NickName;
     }
 
     private void Update()
     {
-        if (photonView.IsMine)
-        {
-            Move();
-            Run();
-            Rotate();
-            Jump();
-        }
+        if (!photonView.IsMine || isDead)
+            return;
+
+        Move();
+        Run();
+        Rotate();
+        Jump();
+
+        nickname.transform.LookAt(cameraController.CamTransform.position);
     }
     #endregion
 
     #region PUBLIC_METHODS
-
+    public string GetName()
+    {
+        return nickTxt.text;
+    }
     #endregion
 
     #region PRIVATE_METHODS
